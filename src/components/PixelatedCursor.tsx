@@ -155,6 +155,15 @@ export default function PixelatedCursor(props: PixelatedCursorProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const poolRef = useRef<Pixel[]>([]);
   const cursorRef = useRef({ x: -1000, y: -1000 });
+  const [isTouchDevice, setIsTouchDevice] = React.useState(true);
+
+  React.useEffect(() => {
+    const isTouch =
+      window.matchMedia("(pointer: coarse)").matches ||
+      "ontouchstart" in window ||
+      navigator.maxTouchPoints > 0;
+    setIsTouchDevice(isTouch);
+  }, []);
 
   // Live props for the rAF loop — mutated in place so a control tweak never
   // restarts the loop or resets the chain back onto the cursor.
@@ -414,6 +423,10 @@ export default function PixelatedCursor(props: PixelatedCursorProps) {
       {labelText}
     </div>
   ) : null;
+
+  if (isTouchDevice) {
+    return null;
+  }
 
   return (
     <div

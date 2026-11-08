@@ -19,7 +19,7 @@ type LoaderVariables = CSSProperties & {
 };
 
 export default function LogoLoader({
-  src = "/images/logo.png",
+  src = "/images/logo.webp",
   size = 280,
   duration = 3.5,
   label = "Loading",

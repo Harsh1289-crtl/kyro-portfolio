@@ -22,10 +22,29 @@ export default function AsciiSphere({
     let animId: number;
     let lastTime = 0;
 
+    let isVisible = true;
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              isVisible = entries[0].isIntersecting;
+            },
+            { threshold: 0.05 }
+          )
+        : null;
+    if (preRef.current && io) io.observe(preRef.current);
+
     const render = (time: number) => {
+      animId = requestAnimationFrame(render);
+      if (
+        !isVisible ||
+        (preRef.current && preRef.current.offsetParent === null)
+      ) {
+        return;
+      }
+
       // Run at ~24 FPS for retro terminal feel
       if (time - lastTime < 42) {
-        animId = requestAnimationFrame(render);
         return;
       }
       lastTime = time;
@@ -80,12 +99,13 @@ export default function AsciiSphere({
       if (preRef.current) {
         preRef.current.textContent = lines.join("\n");
       }
-
-      animId = requestAnimationFrame(render);
     };
 
     animId = requestAnimationFrame(render);
-    return () => cancelAnimationFrame(animId);
+    return () => {
+      cancelAnimationFrame(animId);
+      io?.disconnect();
+    };
   }, [effectiveRadius]);
 
   return (

@@ -524,10 +524,11 @@ export default function Kyro3DModel({
       const h = container.clientHeight;
       if (w <= 0 || h <= 0) return;
 
+      const isMobile = w < 768 || (typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 1.5));
 
       updateGroupScale();
     };
@@ -535,9 +536,21 @@ export default function Kyro3DModel({
     const ro = new ResizeObserver(onResize);
     ro.observe(container);
 
-    // 8. 60 FPS Kinetic Animation Loop
+    // Visibility observer to pause 3D loop when scrolled away
+    let isVisible = true;
+    const io = typeof IntersectionObserver !== "undefined"
+      ? new IntersectionObserver((entries) => {
+          isVisible = entries[0].isIntersecting;
+        }, { threshold: 0.05 })
+      : null;
+    io?.observe(container);
+
+    // 8. Kinetic Animation Loop
     function animate() {
       if (destroyed || !renderer || !scene || !camera || !meshGroup) return;
+      animId = requestAnimationFrame(animate);
+
+      if (!isVisible) return; // Skip 3D rendering when out of viewport
 
       const p = liveProps.current;
       const elapsedTime = clock.getElapsedTime();
@@ -662,7 +675,6 @@ export default function Kyro3DModel({
       }
 
       renderer.render(scene, camera);
-      animId = requestAnimationFrame(animate);
     }
 
     animId = requestAnimationFrame(animate);
@@ -745,6 +757,7 @@ export default function Kyro3DModel({
       destroyed = true;
       cancelAnimationFrame(animId);
       clearInterval(propChecker);
+      io?.disconnect();
       window.removeEventListener("pointermove", onPointerMove);
       container.removeEventListener("pointerdown", onPointerDown);
       window.removeEventListener("pointerup", onPointerUp);

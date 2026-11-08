@@ -50,11 +50,12 @@ export default function Home() {
     if (typeof window === "undefined") return;
 
     const lenis = new Lenis({
-      duration: 1.25,
+      duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
       smoothWheel: true,
-      wheelMultiplier: 1.05,
-      touchMultiplier: 1.4,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.0,
+      syncTouch: true,
     });
     lenisRef.current = lenis;
 

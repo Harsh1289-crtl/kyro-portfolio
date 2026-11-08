@@ -390,7 +390,11 @@ function createVortex(
     powerPreference: "high-performance",
   });
   renderer.setClearColor(0x000000, 0);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+  const isMobile =
+    typeof window !== "undefined" &&
+    (window.innerWidth < 768 ||
+      window.matchMedia("(pointer: coarse)").matches);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, isMobile ? 1.0 : 1.5));
   renderer.toneMapping = THREE.ReinhardToneMapping;
   renderer.toneMappingExposure = 1.25;
 
@@ -1410,9 +1414,30 @@ function __OriginkitBase_Vortex(props: VortexProps) {
   } = props;
 
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = React.useState(true);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMobile(
+      window.innerWidth < 768 ||
+        window.matchMedia("(pointer: coarse)").matches
+    );
+
+    const container = containerRef.current;
+    if (!container || typeof IntersectionObserver === "undefined") return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        setIsVisible(entries[0].isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    io.observe(container);
+    return () => io.disconnect();
+  }, []);
 
   const reducedMotion = useReducedMotion();
-  const running = !reducedMotion;
+  const running = !reducedMotion && isVisible;
 
   const line = { ...DEFAULTS.lineOptions, ...lineOptions };
   const dot = { ...DEFAULTS.dotOptions, ...dotOptions };
@@ -1428,17 +1453,17 @@ function __OriginkitBase_Vortex(props: VortexProps) {
     zoom,
     flowDir: direction === "left" ? -1 : 1,
     flowSpeed: (speed / 100) * (direction === "left" ? -1 : 1),
-    lineCount: line.count,
+    lineCount: isMobile ? 80 : line.count,
     lineColor: line.color,
     lineGlow: (line.glow / 10) * LINE_GLOW_MAX,
     showDots: dots,
-    dotCount: dot.count,
+    dotCount: isMobile ? 2400 : dot.count,
     dotSize: dot.size / DOT_SIZE_SCALE,
     dotColor: dot.color,
     dotGlow: (dot.glow / 10) * DOT_GLOW_MAX,
     dotFlicker: dot.flicker / 10,
     showComets: comets,
-    cometCount: comet.count,
+    cometCount: isMobile ? 3 : comet.count,
     cometSpeed: (comet.speed / 10) * COMET_SPEED_MAX,
     cometColor: comet.color,
     cometGlow: (comet.glow / 10) * COMET_GLOW_MAX,

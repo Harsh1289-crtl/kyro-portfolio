@@ -43,9 +43,9 @@ const RIM_SPREAD = 0.035
 const REF_ASPECT = 1314 / 2860
 
 /* Quality tiers */
-const MAX_DPR = 2
-const RENDER_SCALE = 0.6
-const PIXEL_BUDGET = 2_200_000
+const MAX_DPR = typeof window !== "undefined" && (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches) ? 1.0 : 1.5
+const RENDER_SCALE = typeof window !== "undefined" && (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches) ? 0.45 : 0.6
+const PIXEL_BUDGET = 1_500_000
 
 const VERT = `
 attribute vec2 aPos;
@@ -530,12 +530,24 @@ export function BeyondHorizon(props: BeyondHorizonProps) {
       }
     }
 
+    let isVisible = true
+    const io = typeof IntersectionObserver !== "undefined"
+      ? new IntersectionObserver((entries) => {
+          isVisible = entries[0].isIntersecting
+        }, { threshold: 0.05 })
+      : null
+    if (host && io) io.observe(host)
+
     const onGlobalPointerMove = (e: PointerEvent) => {
+      if (!isVisible) return
       updatePointerFromCoords(e.clientX, e.clientY)
     }
     window.addEventListener("pointermove", onGlobalPointerMove, { passive: true })
 
     const loop = (now: number) => {
+      raf = requestAnimationFrame(loop)
+      if (!isVisible) return
+
       if (!start) start = now
       lastT = (now - start) / 1000
       const p = pointer.current
@@ -545,12 +557,12 @@ export function BeyondHorizon(props: BeyondHorizonProps) {
       p.hover += (p.thover - p.hover) * 0.05
       p.proximity += (p.tproximity - p.proximity) * 0.08
       draw(lastT)
-      raf = requestAnimationFrame(loop)
     }
     raf = requestAnimationFrame(loop)
 
     return () => {
       cancelAnimationFrame(raf)
+      io?.disconnect()
       ro?.disconnect()
       window.removeEventListener("resize", onResize)
       window.removeEventListener("pointermove", onGlobalPointerMove)

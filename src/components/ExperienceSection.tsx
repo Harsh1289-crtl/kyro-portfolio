@@ -45,7 +45,7 @@ const PROJECTS: WorkProject[] = [
     badgeColor: "#38BDF8",
     summary:
       "Every layout, motion curve, and interaction was crafted to run at full refresh rates with zero dropped frames. Built using modern frontend architectures and refined with deliberate, pixel-perfect intent.",
-    imageSrc: "/images/projects/oldtech.jpg",
+    imageSrc: "/images/projects/oldtech.webp",
     visualType: "image",
     link: "https://www.linkedin.com/in/abhigyan-choudhary-3922a63a0/",
   },
@@ -61,7 +61,7 @@ const PROJECTS: WorkProject[] = [
     badgeColor: "#A855F7",
     summary:
       "Managed on-ground logistics, equipment movement, and vendor coordination across campus venues with real-time dispatch and zero delay.",
-    imageSrc: "/images/projects/creatify.jpg",
+    imageSrc: "/images/projects/creatify.webp",
     visualType: "image",
     link: "https://www.linkedin.com/in/abhigyan-choudhary-3922a63a0/",
   },
@@ -109,6 +109,19 @@ export default function ExperienceSection({
   const [selectedProject, setSelectedProject] = useState<WorkProject | null>(null);
   const [activeIdx, setActiveIdx] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(
+        window.innerWidth < 768 ||
+          window.matchMedia("(pointer: coarse)").matches
+      );
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Initialize Lenis (if standalone) & GSAP Scroll-linked Orbital Revolution
   useEffect(() => {
@@ -252,18 +265,21 @@ export default function ExperienceSection({
     >
       {/* 🧭 Sticky Stage Container (Locked for 320vh of revolving orbital scroll) */}
       <div className="sticky top-0 h-screen w-full overflow-hidden flex flex-col justify-between py-6 sm:py-8 md:py-10 z-10">
-        {/* 🌪️ VORTEX DUST FALL BACKGROUND (Enlarged Wire Ring: radius 195) */}
+        {/* 🌪️ VORTEX DUST FALL BACKGROUND (Adaptive Mobile / Desktop) */}
         <div className="absolute inset-0 w-full h-full z-0 pointer-events-auto">
           <VortexDustFall
             background="transparent"
             baseColor="#E2E8F0"
             accentColor="#38BDF8"
-            density={130}
-            dotSize={106}
+            density={isMobile ? 42 : 120}
+            dotSize={isMobile ? 85 : 106}
             speed={44}
             distance={1460}
             tilt={18}
-            ring={{ radius: 195, thickness: 8 }}
+            ring={{
+              radius: isMobile ? 145 : 195,
+              thickness: isMobile ? 6 : 8,
+            }}
             fall={{ height: 135, spin: 36, spray: 0 }}
             style={{
               position: "absolute",

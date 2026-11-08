@@ -6,7 +6,12 @@
 import * as React from "react";
 import { useEffect, useRef } from "react";
 
-const DPR_CAP = 1.5;
+const DPR_CAP =
+  typeof window !== "undefined" &&
+  (window.innerWidth < 768 ||
+    window.matchMedia("(pointer: coarse)").matches)
+    ? 1.0
+    : 1.5;
 const FOV_DEG = 42;
 const TAU = Math.PI * 2;
 
@@ -486,8 +491,21 @@ function __OriginkitBase_VortexDustFall(props: VortexDustFallProps) {
     let hoverY = 0;
     let hoverAmt = 0;
 
+    let isVisible = true;
+    const io =
+      typeof IntersectionObserver !== "undefined"
+        ? new IntersectionObserver(
+            (entries) => {
+              isVisible = entries[0].isIntersecting;
+            },
+            { threshold: 0.05 }
+          )
+        : null;
+    io?.observe(host);
+
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);
+      if (!isVisible) return;
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       const L = live.current;
@@ -577,6 +595,7 @@ function __OriginkitBase_VortexDustFall(props: VortexDustFallProps) {
 
     return () => {
       cancelAnimationFrame(raf);
+      io?.disconnect();
       ro.disconnect();
     };
   }, []);
