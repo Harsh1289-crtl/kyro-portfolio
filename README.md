@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KyRo — Interactive WebGL Vector Wordmark & Beyond Horizon
 
-## Getting Started
+A high-performance Next.js application featuring an interactive WebGL vector wordmark with a pointer-driven lattice rig, paired with the **Beyond Horizon** planet-edge sunrise atmospheric shader.
 
-First, run the development server:
+---
+
+## 🚀 Running the Project
+
+Start the local development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then visit **[http://localhost:3000](http://localhost:3000)** in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📁 Component Organization
 
-## Learn More
+- [`src/components/background/BeyondHorizon.tsx`](file:///c:/Users/abhig/OneDrive/Desktop/Kyro2/src/components/background/BeyondHorizon.tsx) — The **Beyond Horizon** WebGL atmospheric background component (also exported via [`src/background/`](file:///c:/Users/abhig/OneDrive/Desktop/Kyro2/src/background/BeyondHorizon.tsx)).
+- [`src/components/VectorWordmark.tsx`](file:///c:/Users/abhig/OneDrive/Desktop/Kyro2/src/components/VectorWordmark.tsx) — The core WebGL vector wordmark component with lattice rig.
+- [`src/app/page.tsx`](file:///c:/Users/abhig/OneDrive/Desktop/Kyro2/src/app/page.tsx) — The home page seamlessly combining the Beyond Horizon sunrise glow behind the KyRo vector wordmark, complete with live parameter controls.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌅 Using Beyond Horizon in Any Component
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+You can import `BeyondHorizon` directly from `@/components/background/BeyondHorizon` or `@/background`:
 
-## Deploy on Vercel
+```tsx
+import BeyondHorizon from "@/components/background/BeyondHorizon";
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+export default function Section() {
+  return (
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      <BeyondHorizon
+        background="#08080A"
+        brightness={2}
+        speed={1}
+        parallax={2}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          minWidth: 0,
+          minHeight: 0,
+        }}
+      />
+      {/* Your content on top */}
+    </div>
+  );
+}
+```
